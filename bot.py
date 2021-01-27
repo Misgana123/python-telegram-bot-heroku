@@ -16,6 +16,7 @@ bot.
 """
 
 import logging
+import sqlite3
 
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
@@ -44,13 +45,13 @@ questions = ['መመሪያዎች፡\n'
 '994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
 'እርስዎ፡ ስልኬ የሞላሁትን ካርድ ሳልጠቀምበት እየበላብኝ ነው፡፡ ምንድነው ችግሩ?\n\n'
 'ወደጥያቄዎቹ ለመቀጠል ይህንን => /continue ይጫኑ'
-,'ጥያቄ ፡ ስልክዎ ላይ ካርድ ሲሞሉ አልሞላ ይልዎታል፡፡ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+,'ጥያቄ ፡ ስልክዎ ላይ ካርድ ለመሙላት ቢያስቸግርዎ (ስልክዎ ካርድ አልሞላ ቢልዎት)፡፡ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
 '994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
 'እርስዎ፡'
-, 'ጥያቄ ፡ስልክዎ ሳያውቁት የሞሉትን የሞባይል ካርድ ይበላቦታል (ይወስድቦታል)፡፡ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+, 'ጥያቄ ፡ስልክዎ የሞሉትን የሞባይል ካርድ ቢበላብዎት(የሞባይልዎ የአየር ሰአት/ብር/ ቢቀንስ)፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
 '994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
 'እርስዎ፡'
-, 'ጥያቄ ፡ የጥሪ ማሳመሪያ አገልግሎት መጠቀም ፈለጉ (ማለትም ሰዎች የእስዎ ስልክ ላይ ሲደውሉ ጥሪው ዘፈን፣ መዝሙር ወይም ሙዚቃ እዲሆን ቢፈልጉ)፡፡ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+, 'ጥያቄ ፡ የጥሪ ማሳመሪያ አገልግሎት መጠቀም ቢፈልጉ (ማለትም ሰዎች የእስዎ ስልክ ላይ ሲደውሉ ጥሪው ዘፈን፣ መዝሙር ወይም ሙዚቃ እዲሆን ቢፈልጉ)፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
 '994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
 'እርስዎ፡'
 , 'ጥያቄ ፡ የጥሪ ማሳመሪያ አገልግሎት ለማቋረጥ ቢፈልጉ (ማለትም ሰዎች የእስዎ ስልክ ላይ ሲደውሉ ጥሪው ዘፈን፣ መዝሙር ወይም ሙዚቃ እዲሆን ቢፈልጉ)፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
@@ -241,6 +242,37 @@ questions = ['መመሪያዎች፡\n'
 
 ]
 questionCounter = 0
+def loadDB():
+    # Creates SQLite database to store info.
+    conn = sqlite3.connect('content.sqlite')
+    cur = conn.cursor()
+    conn.text_factory = str
+    cur.executescript('''CREATE TABLE IF NOT EXISTS userdata
+    (
+    id TEXT, 
+    firstname TEXT, 
+    lastname TEXT,
+    message TEXT,
+    username TEXT);'''
+    )
+    conn.commit()
+    conn.close()
+
+def addUser(update):
+    # Checks if user has visited the bot before
+    # If yes, load data of user
+    # If no, then create a new entry in database
+    conn = sqlite3.connect('content.sqlite')
+    cur = conn.cursor()
+    conn.text_factory = str
+    
+    cur.execute('''INSERT INTO userdata (id, firstname,lastname,message,username) VALUES (?, ?, ?, ?, ?)''', \
+    (str(update.message.from_user.id), str(update.message.from_user.first_name), str(update.message.from_user.last_name), 
+    str(update.message.text), str(update.message.from_user.username)))
+    
+    conn.commit()
+    conn.close()
+
 def start(update: Update, context: CallbackContext) -> int:
     
     update.message.reply_text(
@@ -275,7 +307,10 @@ def gender(update: Update, context: CallbackContext) -> int:
             questions[questionCounter],
             reply_markup=ReplyKeyboardRemove(),
         )
-       
+        if questionCounter > 1:
+            
+            addUser(update)
+
         questionCounter += 1
         if questionCounter == 5:
             return BIO
@@ -289,6 +324,7 @@ def bio(update: Update, context: CallbackContext) -> int:
 
     global questionCounter
 
+    addUser(update)
     questionCounter = 0
     update.message.reply_text('ተጨማሪ ጥያቄዎችን በመሙላት ሊተባበሩን ፈቃደኛ ከሆኑ ይህንን  => /continue ይጫኑ፡፡ \n ለማቋረጥ ከፈለጉ ይህንን => /cancel ይጫኑ፡፡')
 
@@ -336,4 +372,5 @@ def main() -> None:
 
 
 if __name__ == '__main__':
+    loadDB()
     main()
