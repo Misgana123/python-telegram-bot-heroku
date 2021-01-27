@@ -275,10 +275,7 @@ def gender(update: Update, context: CallbackContext) -> int:
             questions[questionCounter],
             reply_markup=ReplyKeyboardRemove(),
         )
-        if questionCounter > 1:
-            f = open("answers.txt", "a",encoding="utf-8")
-            f.write(str(user.first_name) + " " + str(user.last_name)+ " => question: "+str(questionCounter)+" - "+str(update.message.text)+" --- id: "+str(user.id)+" userName: "+str(user.username)+"\n")
-        
+       
         questionCounter += 1
         if questionCounter == 5:
             return BIO
@@ -292,9 +289,6 @@ def bio(update: Update, context: CallbackContext) -> int:
 
     global questionCounter
 
-    f = open("answers.txt", "a",encoding="utf-8")
-    f.write(str(user.first_name) + " " + str(user.last_name)+ " => question: "+str(questionCounter)+" - "+update.message.text+" --- id: "+str(user.id)+" userName: "+str(user.username)+"\n")
-    f.close()
     questionCounter = 0
     update.message.reply_text('ተጨማሪ ጥያቄዎችን በመሙላት ሊተባበሩን ፈቃደኛ ከሆኑ ይህንን  => /continue ይጫኑ፡፡ \n ለማቋረጥ ከፈለጉ ይህንን => /cancel ይጫኑ፡፡')
 
