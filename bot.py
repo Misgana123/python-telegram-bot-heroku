@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+ #!/usr/bin/env python
 # pylint: disable=W0613, C0116
 # type: ignore[union-attr]
 # This program is dedicated to the public domain under the CC0 license.
@@ -36,90 +36,276 @@ logger = logging.getLogger(__name__)
 
 GENDER, PHOTO, LOCATION, BIO = range(4)
 
+questions = ['መመሪያዎች፡\n'
+'1) ጥያቄዎቹን መመለስ የሚቻለው በአማርኛ ቋንቋ ብቻ ነው፡፡\n'
+'2) ጥያቄዎቹን ሰፋ ባለ መልኩ ይመልሱልን (ከ2 እስከ 3 አረፍተ ነገሮችን ወይም 1 ሰፋ ያለ አረፍተነገር)\n\n'
+'ምሳሌ፡\n'
+'ጥያቄ ፡ ስልክዎ ሳያውቁት የሞሉትን የሞባይል ካርድ ይበላቦታል (ይወስድቦታል)፡፡ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡ ስልኬ የሞላሁትን ካርድ ሳልጠቀምበት እየበላብኝ ነው፡፡ ምንድነው ችግሩ?\n\n'
+'ወደጥያቄዎቹ ለመቀጠል ይህንን => /continue ይጫኑ'
+,'ጥያቄ ፡ ስልክዎ ላይ ካርድ ሲሞሉ አልሞላ ይልዎታል፡፡ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡'
+, 'ጥያቄ ፡ስልክዎ ሳያውቁት የሞሉትን የሞባይል ካርድ ይበላቦታል (ይወስድቦታል)፡፡ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡'
+, 'ጥያቄ ፡ የጥሪ ማሳመሪያ አገልግሎት መጠቀም ፈለጉ (ማለትም ሰዎች የእስዎ ስልክ ላይ ሲደውሉ ጥሪው ዘፈን፣ መዝሙር ወይም ሙዚቃ እዲሆን ቢፈልጉ)፡፡ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡'
+, 'ጥያቄ ፡ የጥሪ ማሳመሪያ አገልግሎት ለማቋረጥ ቢፈልጉ (ማለትም ሰዎች የእስዎ ስልክ ላይ ሲደውሉ ጥሪው ዘፈን፣ መዝሙር ወይም ሙዚቃ እዲሆን ቢፈልጉ)፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡'
+,
+'ጥያቄ ፡ ከቴሌ ላይ የአየር ሰአት (ብር) መበደር ቢፈልጉና ምን ማድረግ እንዳለብዎች መረጃ ለመጠየቅ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ከቴሌ ላይ የአየር ሰአት (ብር) ለመበደር ሲሞከሩ አልሰራ ቢልዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ሲም ካርድዎ አልሰራ ቢልዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የፒዩኬ ኮድ ቁጥርዎን ለመጠየቅ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የፒን ኮድ ቁጥርዎን ለመጠየቅ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የሲም ካርድዎ ቢጠፋብዎት ወይም ቢሰረቅብዎት እና ሲም ካርድዎን ለማዘጋት ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ እርሶ አዘግተውት የነበረውን ሲም ካርድ በድጋሚ ለማስከፈት ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ በራስዎ ስልክ ቁጥር አዲስ ሲም ካርድ ለመግዛት ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የሲም ካርድዎን ባለቤትነት ወደ ሌላ ሰው ለማስቀየር ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የራስዎን ስልክ ቁጥር ስንት እንደሆን ማወቅ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ለመደወል ሲፈልጉ ስልክዎ አልደውል ቢልዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ሰዎች ስልክዎ ላይ ሲደውሉ አልሰራ ቢላቸው ወይም እርስዎ ጋር ባይጠራ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስልክዎ ላይ ሲም ካርድ ሲያስገቡ አልሰራም ቢልዎት፤ ስልክዎ ‘Insert SIM’ ወይም Emergency Call only ቢልዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የስልክዎ የሞባይል ኔትዎርክ(ሲግናል) በጣም አነስተኛ(ደካማ) ቢሆን፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስልክዎ ሜሴጅ(SMS) አልክ ቢልዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ሰው ስልክዎ ላይ ሜሴጅ(SMS) ሲልክ ስልክዎ ሜሴጅ(SMS) አልቀበል ቢልዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ለሰው የሞባይል ብር(የአየር ሰአት) ቢልኩና የተላከለት ስልክ ብሩ(የአየር ሰአቱ) ባይደርሰው፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ለሰው የሞባይል ብር(የአየር ሰአት) ለመላክ ሲሞክሩ አልሰራ ቢልዎት ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ሞባይሎ(ስልክዎ) ያለውን የአየር ሰአት (ብር) ለማወቅ ቢፈልጉ ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስልክዎ ላይ በተደጋጋሚ የማይፈልጉት ሜሴጅ(SMS) አየገባ ቢያስቸግርዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የሜሴጅ(SMS) ታሪፍ(ዋጋ) ማወቅ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የስልክ ጥሪ ታሪፍ(ዋጋ) ማወቅ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የኢንተርኔት ታሪፍ(ዋጋ) ማወቅ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የኢንተርኔት አገልግሎት በስልክዎ መጠቀም ቢያቅቶት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የማህበራዊ ድህረገጾችን (Social Media) ለመጠቀም ፈልገው ቢያቅቶት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስለ ሞባይል ፓኬጅ መረጃ ማወቅ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስልክዎ የሞባይል ፓኬጅ አልሞላ ቢልዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ በስልክዎ የሞሉት የሞባይል ፓኬጅ ቀኑ ሳይደርስ ቢቋረጥ (expire ቢያደርግ)፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ በስልክዎ የሞሉት የሞባይል ፓኬጅ “75% ተጠቅመዋል” የሚል ሜሴጅ ሳይደርስዎት ቢያልቅ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ በስልክዎ የሞሉት የሞባይል ፓኬጅ ወደሌላ ሰው ለማዘዋወር(ለማስተላለፍ) ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ በስህተት በስልክዎ የሞሉትን የሞባይል ፓኬጅ ወደሌላ ለመቀየር ወይም ለማስመለስ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ በስልክዎ ላይ የቀረው የሞባይል ፓኬጅ ምን ያህል እንደሆነ ማወቅ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስለ ቮይስ ሜይል( Voice Mail) አገልግሎት መረጃ ማወቅ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ በስልክዎ ላይ የቮይስ ሜይል( Voice Mail) አገልግሎት ማስጀመር ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የቮይስ ሜይል(Voice Mail) አገልግሎት ማቋረጥ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የቮይስ ሜይል(Voice Mail) አገልግሎት አልሰራ ቢልዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስልክዎ ላይ ካርድ ሲሞሉ የሲም ካርድዎ የአገልግሎት ቀን(Expiry date) ባይራዘም፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስልክዎን ሲጠቀሙ ከተገቢው በላይ ታሪፍ(ብር) ቢያስከፍልዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ለሰው የሞባይል ፓኬጅ ጊፍት ለመላክ ምን ማድረግ እንዳለቦት መረጃ ማግኘት ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ለሰው የሞባይል ፓኬጅ ጊፍት ለመላክ ፈልገው ስልክዎ አልክ ቢልዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ለሰው የሞባይል ፓኬጅ ጊፍት ልከው፣ ከእርስዎ ስልክ ላይ ብር ቆርጦ ለተላከለት ሰው ፓኬጁ ባይደርስ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የCall Conference(በአንድ ጊዜ ብዙ ሰዎችን የማውራት) አገልግሎት መጠቀም ፈልገው ምን ማድረግ እንዳለቦት ለማወቅ ቢፈለጉ ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የCall Conference(በአንድ ጊዜ ብዙ ሰዎችን የማውራት) አገልግሎት አልሰራ ቢልዎት ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የCall Conference(በአንድ ጊዜ ብዙ ሰዎችን የማውራት) አገልግሎት ታሪፍ(ዋጋ) ማወቅ ቢፈልጉ ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የCall Conference(በአንድ ጊዜ ብዙ ሰዎችን የማውራት) አገልግሎት ከሚገባው በላይ ቢያስከፍልዎት ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ Call Me Back (መልሰው ይደውሉልኝ፣ኮል ሚ ባክ) አገልግሎት ለመጠቀም ምን ማድረግ እንዳለቦት ማወቅ ቢፈልጉ ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስልክዎ Call Me Back (መልሰው ይደውሉልኝ፣ኮል ሚ ባክ) አልልክ ቢልዎ ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስለፍሌክሲ ፓኬጅ(Flexi Packages) መረጃ ማወቅ ቢፈልጉ ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ በስልክዎ ፍሌክሲ ፓኬጅ(Flexi Packages) ለመሙላት ፈልገው መሙላት ቢያስቸግርዎ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ፍሌክሲ ፓኬጅ(Flexi Packages) ከታሪፍ በላይ ብር ቢበላብዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስለ-ይሙሉ የኤሌክትሮኒክ ካርድ መሙያ አገልግሎት መረጃ ማወቅ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ በ-ይሙሉ የኤሌክትሮኒክ ካርድ መሙያ አገልግሎት ካርድ ለመሙላት ቢፈልጉና አልሞላ ቢልዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የ-ይሙሉ የኤሌክትሮኒክ ካርድ መሙያ አገልግሎት ሻጭ(ቸርቻሪ) ለመሆን ቢፈልጉና ምን ማድረግ እንዳለቦት ለማወቅ ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ በስልክዎ የ909 አገልግሎት ለመጠቀም ቢያስቸግርዎ ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የ994  አገልግሎት በሌላ ቋንቋ መጠቀም ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የ994 የደንበኞችን አገልግሎት ለመጠቀም ቢያስቸግረዎ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስለ994 የደንበኞችን አገልግሎት ሰራተኞች አስተያየት ለመስጠት ቢፈልጉ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የመስመር ስልክ ተጠቅመው መደወል ቢያስቸግርዎ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ የመስመር ስልክዎ ላይ ሲደወል ስልኩ ጥሪ የማይቀበል ከሆነ፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
+'ጥያቄ ፡ ስልክዎ ወደውጪ ሃገር ለመደወል ካስቸገርዎት፤ በዚህ ጊዜ 994 በመደወል ምን በማለት ይጠይቃሉ?\n\n'
+'994፡ ኢትዮ ቴሌኮም ነኝ፡፡ እባክዎን ምን ልርዳዎት?\n\n'
+'እርስዎ፡',
 
+
+]
+questionCounter = 0
 def start(update: Update, context: CallbackContext) -> int:
-    reply_keyboard = [['Boy', 'Girl', 'Other']]
-
+    
     update.message.reply_text(
-        'ሰላም! ምስጋና ወርቅነህ እባላለው። I will hold a conversation with you. '
-        'Send /cancel to stop talking to me.\n\n'
-        'Are you a boy or a girl?',
-        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True),
+        'ሰላም! ጃርሶ-ኤአይ (Jarso-AI) እንባላለን፡፡ የኢትዮ ቴሌኮም 994 የደንበኞችን አገልግሎት የተቀላጠፈ ለማድረግ በስራ ላይ እገኛለን፡፡ '
+        'እርስዎም በዚህ ስራ ላይ የበኩልዎን በማበርከት እንዲተባበሩን እንጠይቃለን፡፡ \nከዚህ በመቀጠል የሚመጡትን አነስተኛ ጥያቄዎች በጥንቃቄ በማንበብ'
+        ' መልስዎን ይላኩልን፡፡ \n\nይህንን ቅጽ በጥንቃቄና በተገቢው ሁኔታ ለሚሞሉ ተባባሪዎቻችን በየቀኑ ከ25 እስከ 200 ብር የሚደርሱ የሞባይል ካርዶችን'
+        ' ለባለእድለኞች እንደማበረታቻ ሽልማት የምናቀርብ ይሆናል፡፡\n\n'
+        
+        'ለመቀጠል ይህንን => /continue ይጫኑ',
+        
     )
 
     return GENDER
 
 
 def gender(update: Update, context: CallbackContext) -> int:
+    global questionCounter
+    if questionCounter <=1 and update.message.text != "/continue":
+        update.message.reply_text("እባክዎን ከላይ ያሉትን ሊንኮች ብቻ ይጫኑ፡፡")
+        return GENDER
+    if questionCounter > 1 and (update.message.text.lower().islower() or update.message.text.upper().isupper()):
+        update.message.reply_text("ጥያቄዎቹን መሙላት የሚቻለው በአማርኛ ቋንቋ ብቻ ነው፡፡ እባክዎን መልስዎን በአማርኛ ብቻ ይሙሉ፡፡")
+        return GENDER
+    if len(update.message.text) < 5:
+        update.message.reply_text("የሰጡን መልስ በጣም አጭር ነው፡፡ እባክዎን መልስዎን ረዘም ባለ አረፍተነገር/ሮች ይመልሱልን፡፡")
+        return GENDER
     user = update.message.from_user
+    
     logger.info("Gender of %s: %s", user.first_name, update.message.text)
-    update.message.reply_text(
-        'I see! Please send me a photo of yourself, '
-        'so I know what you look like, or send /skip if you don\'t want to.',
-        reply_markup=ReplyKeyboardRemove(),
-    )
-
-    return PHOTO
-
-
-def photo(update: Update, context: CallbackContext) -> int:
-    user = update.message.from_user
-    photo_file = update.message.photo[-1].get_file()
-    photo_file.download('user_photo.jpg')
-    logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
-    update.message.reply_text(
-        'Gorgeous! Now, send me your location please, ' 'or send /skip if you don\'t want to.'
-    )
-
-    return LOCATION
-
-
-def skip_photo(update: Update, context: CallbackContext) -> int:
-    user = update.message.from_user
-    logger.info("User %s did not send a photo.", user.first_name)
-    update.message.reply_text(
-        'I bet you look great! Now, send me your location please, ' 'or send /skip.'
-    )
-
-    return LOCATION
-
-
-def location(update: Update, context: CallbackContext) -> int:
-    user = update.message.from_user
-    user_location = update.message.location
-    logger.info(
-        "Location of %s: %f / %f", user.first_name, user_location.latitude, user_location.longitude
-    )
-    update.message.reply_text(
-        'Maybe I can visit you sometime! ' 'At last, tell me something about yourself.'
-    )
-
-    return BIO
-
-
-def skip_location(update: Update, context: CallbackContext) -> int:
-    user = update.message.from_user
-    logger.info("User %s did not send a location.", user.first_name)
-    update.message.reply_text(
-        'You seem a bit paranoid! ' 'At last, tell me something about yourself.'
-    )
-
-    return BIO
-
+    try:
+        update.message.reply_text(
+            questions[questionCounter],
+            reply_markup=ReplyKeyboardRemove(),
+        )
+        if questionCounter > 1:
+            f = open("answers.txt", "a",encoding="utf-8")
+            f.write(str(user.first_name) + " " + str(user.last_name)+ " => question: "+str(questionCounter)+" - "+str(update.message.text)+" --- id: "+str(user.id)+" userName: "+str(user.username)+"\n")
+        
+        questionCounter += 1
+        if questionCounter == 5:
+            return BIO
+    except Exception as e:
+        print("Unexpected error:",str(e),e.__traceback__.tb_lineno)
+    return GENDER
 
 def bio(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user
     logger.info("Bio of %s: %s", user.first_name, update.message.text)
-    update.message.reply_text('Thank you! I hope we can talk again some day.')
 
-    return ConversationHandler.END
+    global questionCounter
+
+    f = open("answers.txt", "a",encoding="utf-8")
+    f.write(str(user.first_name) + " " + str(user.last_name)+ " => question: "+str(questionCounter)+" - "+update.message.text+" --- id: "+str(user.id)+" userName: "+str(user.username)+"\n")
+    f.close()
+    questionCounter = 0
+    update.message.reply_text('ተጨማሪ ጥያቄዎችን በመሙላት ሊተባበሩን ፈቃደኛ ከሆኑ ይህንን  => /continue ይጫኑ፡፡ \n ለማቋረጥ ከፈለጉ ይህንን => /cancel ይጫኑ፡፡')
+
+    return GENDER
 
 
 def cancel(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user
     logger.info("User %s canceled the conversation.", user.first_name)
     update.message.reply_text(
-        'Bye! I hope we can talk again some day.', reply_markup=ReplyKeyboardRemove()
+        'ስለትብብርዎ ከልብ እናመሰግናለን፡፡ የሽልማት ባለእድለኞችን እናሳውቆታለን፡፡', reply_markup=ReplyKeyboardRemove()
     )
 
     return ConversationHandler.END
@@ -129,7 +315,7 @@ def main() -> None:
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-    updater = Updater("1362586323:AAE0GPCKl8xxyp8cbslxezxAaD5BTa1KJCc", use_context=True)
+    updater = Updater("1578959416:AAHrp6qjT4Qf3PFkkPiNtJ_ORCr0bCWUiRY", use_context=True)
 
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
@@ -138,13 +324,8 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
-            GENDER: [MessageHandler(Filters.regex('^(Boy|Girl|Other)$'), gender)],
-            PHOTO: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],
-            LOCATION: [
-                MessageHandler(Filters.location, location),
-                CommandHandler('skip', skip_location),
-            ],
-            BIO: [MessageHandler(Filters.text & ~Filters.command, bio)],
+            GENDER: [MessageHandler(Filters.text & ~Filters.command, gender),CommandHandler('continue', gender)],
+            BIO: [MessageHandler(Filters.text & ~Filters.command, bio),CommandHandler('continue', gender)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
